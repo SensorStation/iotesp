@@ -162,13 +162,15 @@ static inline esp_err_t dht_fetch_data(dht_sensor_type_t sensor_type, gpio_num_t
 
     // Step through Phase 'B', 40us
     CHECK_LOGE(dht_await_pin_state(pin, 40, 0, NULL),
-            "Initialization error, problem in phase 'B'");
+               "Initialization error, problem in phase 'B'");
+
     // Step through Phase 'C', 88us
     CHECK_LOGE(dht_await_pin_state(pin, 88, 1, NULL),
-            "Initialization error, problem in phase 'C'");
+               "Initialization error, problem in phase 'C'");
+
     // Step through Phase 'D', 88us
     CHECK_LOGE(dht_await_pin_state(pin, 88, 0, NULL),
-            "Initialization error, problem in phase 'D'");
+               "Initialization error, problem in phase 'D'");
 
     // Read in each of the 40 bits of data...
     for (int i = 0; i < DHT_DATA_BITS; i++)
