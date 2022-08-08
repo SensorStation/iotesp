@@ -25,7 +25,7 @@ bool mqtt_is_running = false;
  */
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
+    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%ld", base, event_id);
 
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t) event_data;
     esp_mqtt_client_handle_t client = event->client;
@@ -88,7 +88,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void mqtt_start()
 {
     esp_mqtt_client_config_t mqtt_cfg = {};
-    mqtt_cfg.uri = "mqtt://10.11.1.11"; // should be: CONFIG_BROKER_URL;
+    mqtt_cfg.broker.address.uri = "mqtt://10.11.1.11"; // should be: CONFIG_BROKER_URL;
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(mqtt_client, (esp_mqtt_event_id_t) ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
