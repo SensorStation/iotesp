@@ -1,0 +1,74 @@
+
+dht.cc,1125
+#define DHT_TIMER_INTERVAL DHT_TIMER_INTERVAL62,2527
+#define DHT_DATA_BITS DHT_DATA_BITS63,2556
+#define DHT_DATA_BYTES DHT_DATA_BYTES64,2581
+static const char *TAG = "DHT";TAG94,3969
+static portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;mux97,4029
+#define PORT_ENTER_CRITICAL(PORT_ENTER_CRITICAL98,4085
+#define PORT_EXIT_CRITICAL(PORT_EXIT_CRITICAL99,4140
+#define PORT_ENTER_CRITICAL(PORT_ENTER_CRITICAL102,4225
+#define PORT_EXIT_CRITICAL(PORT_EXIT_CRITICAL103,4276
+#define CHECK_ARG(CHECK_ARG106,4333
+#define CHECK_LOGE(CHECK_LOGE108,4414
+static esp_err_t dht_await_pin_state(gpio_num_t pin, uint32_t timeout,dht_await_pin_state124,4881
+static inline esp_err_t dht_fetch_data(dht_sensor_type_t sensor_type, gpio_num_t pin, uint8_t data[DHT_DATA_BYTES])dht_fetch_data152,5771
+static inline int16_t dht_convert_data(dht_sensor_type_t sensor_type, uint8_t msb, uint8_t lsb)dht_convert_data197,7210
+esp_err_t dht_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,dht_read_data217,7597
+esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type, gpio_num_t pin,dht_read_float_data256,8751
+
+main.cc,929
+static const char *TAG = "SensorStation";TAG36,766
+static const dht_sensor_type_t sensor_type = DHT_TYPE_AM2301;sensor_type37,808
+static const gpio_num_t dht_gpio = (gpio_num_t)18;dht_gpio38,870
+const auto sleep_time = seconds { 5 };sleep_time40,922
+ESP_EVENT_DEFINE_BASE(PUBLICATION_EVENTS);PUBLICATION_EVENTS43,1016
+ESP_EVENT_DEFINE_BASE(TIMER_EVENTS);TIMER_EVENTS44,1059
+esp_timer_handle_t TIMER;TIMER46,1097
+static char* get_id_string(esp_event_base_t base, int32_t id) {get_id_string48,1124
+static void data_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)data_handler81,1996
+int16_t temperature = 0;temperature87,2229
+int16_t humidity = 0;humidity88,2254
+void dht_test(void *pvParameters)dht_test90,2277
+void log_start()log_start130,3862
+void net_start()net_start145,4437
+void events_start()events_start160,4931
+extern "C" void app_main(void)app_main168,5384
+
+mqtt.cc,327
+static const char* TAG = "MQTT";TAG12,182
+esp_mqtt_client_handle_t mqtt_client;mqtt_client13,215
+bool mqtt_is_running = false;mqtt_is_running14,253
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)mqtt_event_handler26,669
+void mqtt_start()mqtt_start88,3097
+
+ticker.cc,155
+static const char* TAG = "TICKER";TAG9,105
+void periodic_timer_callback(void* arg)periodic_timer_callback13,194
+void ticker_init()ticker_init51,1520
+
+dht.hh,367
+#define __DHT_H____DHT_H__47,2103
+#define HELPER_TARGET_IS_ESP32 HELPER_TARGET_IS_ESP3256,2209
+    DHT_TYPE_DHT11 = 0,   //!< DHT11DHT_TYPE_DHT1163,2285
+    DHT_TYPE_AM2301,      //!< AM2301 (DHT21, DHT22, AM2302, AM2321)DHT_TYPE_AM230164,2322
+    DHT_TYPE_SI7021       //!< Itead Si7021DHT_TYPE_SI702165,2391
+} dht_sensor_type_t;dht_sensor_type_t66,2435
+
+event.hh,511
+ESP_EVENT_DECLARE_BASE(TIMER_EVENTS); TIMER_EVENTS4,39
+ESP_EVENT_DECLARE_BASE(PUBLICATION_EVENTS);PUBLICATION_EVENTS5,78
+enum EVENT_TIMER_TYPES {EVENT_TIMER_TYPES7,123
+    EVENT_TIMER_STARTED,EVENT_TIMER_STARTED8,148
+    EVENT_TIMER_EXPIRY,EVENT_TIMER_EXPIRY9,173
+    EVENT_TIMER_STOPPEDEVENT_TIMER_STOPPED10,197
+enum EVENT_PUBLICATION_TYPE {EVENT_PUBLICATION_TYPE13,225
+    EVENT_PUBLICATION_TEMPC,EVENT_PUBLICATION_TEMPC14,255
+    EVENT_PUBLICATION_HUMIDITY,EVENT_PUBLICATION_HUMIDITY15,284
+
+mqtt.hh,0
+
+ticker.hh,0
+
+utils.hh,96
+static void log_error_if_nonzero(const char *message, int error_code)log_error_if_nonzero3,14

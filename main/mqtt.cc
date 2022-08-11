@@ -37,8 +37,8 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
 
         // TODO make IP address configurable
-        msg_id = esp_mqtt_client_publish(client, "ss/data/10.55.13.13/tempf", "87.7", 0, 1, 0);
-        ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+        // msg_id = esp_mqtt_client_publish(client, "ss/data/10.55.13.13/tempf", "87.7", 0, 1, 0);
+        // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         mqtt_is_running = true;
 
         // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
