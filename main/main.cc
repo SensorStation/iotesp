@@ -64,7 +64,6 @@ void net_start()
 void sensor_reader_ticker(void* arg)
 {
     if (mqtt_is_running == false) {
-        std::cout << "sensor read ticker | mqtt not running returning" << std::endl;
         return;
     }
 
