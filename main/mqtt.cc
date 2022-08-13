@@ -1,17 +1,49 @@
+#include <string>
+
 #include <esp_event.h>
 #include <esp_event.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
 #include <esp_log.h>
 
+#include "event.hh"
 #include "utils.hh"
-#include "ticker.hh"
-
 #include "mqtt_client.h"
 
 static const char* TAG = "MQTT";
 esp_mqtt_client_handle_t mqtt_client;
 bool mqtt_is_running = false;
+
+void mqtt_publish(std::string topic, int val) {
+    std::string root = "ss/data/";
+    std::string ip = "10.11.44.21";
+    auto path = root + ip + "/" + topic;
+
+    char str[8];
+    sprintf(str, "%3.2f", (double) val / 10);
+    auto msg_id = esp_mqtt_client_publish(mqtt_client,
+                                          path.c_str(),
+                                          str, 0, 1, 0);
+    ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
+}
+
+// Handle incoming event data
+static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
+{
+    ESP_LOGI(TAG, "MQTT_EVENT_DATA");
+    printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+    printf("DATA=%.*s\r\n", event->data_len, event->data);
+
+    // post a publication event
+    // ESP_ERROR_CHECK(esp_event_post(TIMER_EVENTS, TIMER_EVENT_STOPPED, NULL, 0, portMAX_DELAY));
+    // bool on = (bool) event->data;
+    // ESP_ERROR_CHECK(esp_event_post(PUBLICATION_EVENTS,
+    //                                EVENT_DEVICE_RELAY,
+    //                                static_cast<void*>(&t),
+    //                                sizeof(temperature),
+    //                                portMAX_DELAY));
+
+}
 
 /*
  * @brief Event handler registered to receive MQTT events
@@ -64,9 +96,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         break;
 
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
+        mqtt_incoming_data(event);
         break;
 
     case MQTT_EVENT_ERROR:

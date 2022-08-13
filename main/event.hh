@@ -1,10 +1,13 @@
 #pragma once
 
+#include <esp_event.h>
+
 // Declare an event base
+ESP_EVENT_DECLARE_BASE(DATA_EVENTS);
 ESP_EVENT_DECLARE_BASE(TIMER_EVENTS); 
 ESP_EVENT_DECLARE_BASE(PUBLICATION_EVENTS);
 
-enum EVENT_TIMER_TYPES {
+enum EVENT_TIMER_TYPE {
     EVENT_TIMER_STARTED,
     EVENT_TIMER_EXPIRY,
     EVENT_TIMER_STOPPED
@@ -15,3 +18,13 @@ enum EVENT_PUBLICATION_TYPE {
     EVENT_PUBLICATION_HUMIDITY,
 };
 
+enum EVENT_DATA_TYPE {
+    EVENT_DEVICE_RELAY_OFF,
+    EVENT_DEVICE_RELAY_ON,
+};
+
+struct event_value {
+    int16_t value;
+};
+
+extern void events_start();

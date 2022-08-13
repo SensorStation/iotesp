@@ -77,8 +77,10 @@ typedef enum
  * @param[out] temperature Temperature, degrees Celsius * 10, nullable
  * @return `ESP_OK` on success
  */
-esp_err_t dht_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
-        int16_t *humidity, int16_t *temperature);
+esp_err_t dht_read_data(dht_sensor_type_t sensor_type,
+                        gpio_num_t pin,
+                        int16_t *humidity,
+                        int16_t *temperature);
 
 /**
  * @brief Read float data from sensor on specified pin
@@ -91,8 +93,10 @@ esp_err_t dht_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
  * @param[out] temperature Temperature, degrees Celsius, nullable
  * @return `ESP_OK` on success
  */
-esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
-        float *humidity, float *temperature);
+esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type,
+                              gpio_num_t pin,
+                              float *humidity,
+                              float *temperature);
 
 #ifdef __cplusplus
 }

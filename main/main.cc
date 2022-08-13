@@ -14,7 +14,6 @@
 #include <string>
 #include <sstream>
 
-#include <esp_event.h>
 #include <esp_log.h>
 #include <esp_netif.h>
 #include <esp_pthread.h>
@@ -26,10 +25,15 @@
 #include <freertos/task.h>
 #include "protocol_examples_common.h"
 
+#include <driver/gpio.h>
+
 #include "dht.hh"
 #include "event.hh"
 #include "mqtt.hh"
-#include "ticker.hh"
+
+#include "relay.hh"
+
+const gpio_num_t RELAY_PIN     = (gpio_num_t) 5;
 
 using namespace std::chrono;
 
@@ -37,56 +41,10 @@ static const char *TAG = "SensorStation";
 static const dht_sensor_type_t sensor_type = DHT_TYPE_AM2301;
 static const gpio_num_t dht_gpio = (gpio_num_t)18;
 
-const auto sleep_time = seconds { 5 };
-
-struct Value {
-    int16_t value;
-};
-
-
-/* Event source periodic timer related definitions */
-ESP_EVENT_DEFINE_BASE(PUBLICATION_EVENTS);
-ESP_EVENT_DEFINE_BASE(TIMER_EVENTS);
+const auto sleep_time   = seconds { 5 };
+const auto relay_pin    = 5;
 
 esp_timer_handle_t TIMER;
-
-static char* get_id_string(esp_event_base_t base, int32_t id) {
-    char* event = (char *)"";
-
-    if (base == TIMER_EVENTS) {
-        switch(id) {
-        case EVENT_TIMER_STARTED:
-            event = (char *) "EVENT_TIMER_STARTED";
-            break;
-
-        case EVENT_TIMER_EXPIRY:
-            event = (char *) "EVENT_TIMER_EXPIRY";
-            break;
-
-        case EVENT_TIMER_STOPPED:
-            event = (char *) "EVENT_TIMER_STOPPED";
-            break;
-        }
-
-    } else if (base == PUBLICATION_EVENTS ){
-
-        switch (id) {
-        case EVENT_PUBLICATION_TEMPC:
-            event = (char *) "EVENT_PUBLICATION_TEMPC";
-            break;
-
-        case EVENT_PUBLICATION_HUMIDITY:
-            event = (char *) "EVENT_PUBLICATION_HUMIDITY";
-            break;
-        }
-
-    } else {
-
-        event = (char *) "TASK_ITERATION_EVENT";
-    }
-
-    return event;
-}
 
 void net_start()
 {
@@ -103,54 +61,10 @@ void net_start()
     ESP_ERROR_CHECK(example_connect());
 }
 
-static void publish(std::string topic, int val) {
-    std::string root = "ss/data/";
-    std::string ip = "10.11.44.21";
-    auto path = root + ip + "/" + topic;
-
-    char str[8];
-    sprintf(str, "%3.2f", (double) val / 10);
-    auto msg_id = esp_mqtt_client_publish(mqtt_client,
-                                          path.c_str(),
-                                          str, 0, 1, 0);
-    ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
-}
-
-static void data_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
-{
-    Value *val = static_cast<Value*>(event_data);
-    ESP_LOGI(TAG, "%s:%s - %d: data_handler", base, get_id_string(base, id), val->value);
-
-    if (base != PUBLICATION_EVENTS) {
-        ESP_LOGW(TAG, "unwanted event: %s:%s - %d: data_handler", base, get_id_string(base, id), val->value);
-        return;
-    }
-
-    switch (id) {
-    case EVENT_PUBLICATION_TEMPC:
-        publish("tempc", val->value);
-        break;
-
-    case EVENT_PUBLICATION_HUMIDITY:
-        publish("humidity", val->value);
-        break;
-
-    default:
-        ESP_LOGW(TAG, "unknow event id: %s:%s - %d: data_handler", base, get_id_string(base, id), val->value);
-        return;
-    }
-}
-
-void events_start()
-{
-    // Create the default event loop
-    ESP_ERROR_CHECK(esp_event_handler_register(PUBLICATION_EVENTS, EVENT_PUBLICATION_TEMPC, data_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(PUBLICATION_EVENTS, EVENT_PUBLICATION_HUMIDITY, data_handler, NULL));
-}
-
-void sensor_reader_cb(void* arg)
+void sensor_reader_ticker(void* arg)
 {
     if (mqtt_is_running == false) {
+        std::cout << "sensor read ticker | mqtt not running returning" << std::endl;
         return;
     }
 
@@ -163,14 +77,13 @@ void sensor_reader_cb(void* arg)
     int16_t temperature;
     int16_t humidity;
 
-    if (dht_read_data(sensor_type, dht_gpio, &humidity, &temperature) == ESP_OK) {
-        printf("Humidity: %d%% Temp: %dc\n", humidity / 10, temperature / 10);
-    } else {
-        printf("Could not read data from sensor\n");            
+    auto err = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
+    if (err != ESP_OK) {
+        printf("Could not read data from sensor\n");
+        return;
     }
-
-    Value t;
-    Value h;
+    event_value t;
+    event_value h;
 
     t.value = temperature;
     h.value = humidity;
@@ -209,7 +122,7 @@ void log_init()
 void ticker_init()
 {
     esp_timer_create_args_t periodic_timer_args = {};
-    periodic_timer_args.callback = &sensor_reader_cb;
+    periodic_timer_args.callback = &sensor_reader_ticker;
     periodic_timer_args.name = "periodic";
 
     esp_timer_handle_t periodic_timer;
@@ -225,8 +138,6 @@ extern "C" void app_main(void)
     events_start();
     mqtt_start();
     ticker_init();
-
-    // xTaskCreate(dht_test, "dht_test", configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL);
 
     std::cout << "<<<<< Sleepy loop timer >>>>>>" << std::endl;
     while(true) {
