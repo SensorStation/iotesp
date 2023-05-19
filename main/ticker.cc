@@ -3,8 +3,6 @@
 #include "ticker.hh"
 #include "sensor.hh"
 
-// esp_timer_handle_t TIMER;
-
 void ticker_init()
 {
     esp_timer_create_args_t periodic_timer_args = {};

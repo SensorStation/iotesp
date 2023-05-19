@@ -4,12 +4,10 @@
 #include <thread>
 #include <chrono>
 
-#include "dht.hh"
 #include "event.hh"
-#include "mqtt.hh"
 #include "log.hh"
+#include "mqtt.hh"
 #include "net.hh"
-#include "sensor.hh"
 #include "ticker.hh"
 
 #include "relay.hh"
