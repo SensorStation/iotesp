@@ -15,21 +15,18 @@
 #include <sstream>
 
 #include <esp_log.h>
-#include <esp_netif.h>
 #include <esp_pthread.h>
 #include <esp_timer.h>
 
-#include <nvs_flash.h>
-
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include "protocol_examples_common.h"
 
 #include <driver/gpio.h>
 
 #include "dht.hh"
 #include "event.hh"
 #include "mqtt.hh"
+#include "net.hh"
 
 #include "relay.hh"
 
@@ -45,21 +42,6 @@ const auto sleep_time   = seconds { 5 };
 const auto relay_pin    = 5;
 
 esp_timer_handle_t TIMER;
-
-void net_start()
-{
-    // Start running different aspects of the system
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    /* This helper function configures Wi-Fi or Ethernet, as selected
-     * in menuconfig.  Read "Establishing Wi-Fi or Ethernet
-     * Connection" section in examples/protocols/README.md for more
-     * information about this function.
-     */
-    ESP_ERROR_CHECK(example_connect());
-}
 
 void sensor_reader_ticker(void* arg)
 {

@@ -3,4 +3,5 @@ idf_component_register(SRCS
         dht.cc
         event.cc
         mqtt.cc
+        net.cc
         INCLUDE_DIRS ".")
