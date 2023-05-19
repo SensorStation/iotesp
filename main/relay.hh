@@ -5,6 +5,8 @@
 const int OFF   = 0;
 const int ON    = 1;
 
+const auto relay_pin    = 5;
+
 class Relay {
 private:    
     gpio_num_t  _pin;
