@@ -19,7 +19,8 @@ const auto sleep_time   = seconds { 5 };
 extern "C" void app_main(void)
 {
     log_init();
-    net_start();
+    // net_start();
+    Net net;
 
     events_start();
     mqtt_start();

@@ -7,6 +7,7 @@ static const char *TAG = "SensorStation";
 
 void log_init()
 {
+    // TODO Announce the Free memory and version via MQTT
     ESP_LOGI(TAG, "[APP] Sensor Station is Starting");
     ESP_LOGI(TAG, "[APP] Free memory: %ld bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());

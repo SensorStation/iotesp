@@ -14,6 +14,7 @@ static const char* TAG = "MQTT";
 esp_mqtt_client_handle_t mqtt_client;
 bool mqtt_is_running = false;
 
+// Todo get the IP address from the configuration
 void mqtt_publish(std::string topic, int val) {
     std::string root = "ss/data/";
     std::string ip = "10.11.44.21";
@@ -42,7 +43,6 @@ static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
     //                                static_cast<void*>(&t),
     //                                sizeof(temperature),
     //                                portMAX_DELAY));
-
 }
 
 /*
@@ -118,6 +118,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
 void mqtt_start()
 {
+    // Get the broker from configuration structure
     esp_mqtt_client_config_t mqtt_cfg = {};
     mqtt_cfg.broker.address.uri = "mqtt://10.11.1.11"; // should be: CONFIG_BROKER_URL;
 

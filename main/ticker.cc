@@ -11,6 +11,6 @@ void ticker_init()
 
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 500000));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 5000000)); 
 }
 
