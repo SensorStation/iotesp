@@ -9,6 +9,7 @@
 #include "event.hh"
 #include "utils.hh"
 #include "mqtt_client.h"
+#include "net.hh"
 
 static const char* TAG = "MQTT";
 esp_mqtt_client_handle_t mqtt_client;
@@ -17,8 +18,8 @@ bool mqtt_is_running = false;
 // Todo get the IP address from the configuration
 void mqtt_publish(std::string topic, int val) {
     std::string root = "ss/data/";
-    std::string ip = "10.11.44.21";
-    auto path = root + ip + "/" + topic;
+    // std::string ip = "10.11.44.21";
+    std::string path = root + net->mac2str() + "/" + topic;
 
     char str[8];
     sprintf(str, "%3.2f", (double) val / 10);
