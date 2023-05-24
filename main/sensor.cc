@@ -10,7 +10,7 @@ static const gpio_num_t dht_gpio = (gpio_num_t)18;
 
 void sensor_reader_ticker(void *arg)
 {
-    if (mqtt_is_running == false) {
+    if (mqtt->running() == false) {
         return;
     }
 

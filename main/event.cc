@@ -61,11 +61,11 @@ static void data_handler(void* handler_args, esp_event_base_t base, int32_t id, 
 
     switch (id) {
     case EVENT_PUBLICATION_TEMPC:
-        mqtt_publish("tempc", val->value);
+        mqtt->publish("tempc", val->value);
         break;
 
     case EVENT_PUBLICATION_HUMIDITY:
-        mqtt_publish("humidity", val->value);
+        mqtt->publish("humidity", val->value);
         break;
 
     default:

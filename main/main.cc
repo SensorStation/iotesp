@@ -14,7 +14,8 @@
 
 using namespace std::chrono;
 
-Net *net = NULL;
+Net     *net = NULL;
+MQTT    *mqtt = NULL;
 
 extern "C" void app_main(void)
 {
@@ -23,7 +24,7 @@ extern "C" void app_main(void)
 
     events_start();
 
-    mqtt_start();
+    mqtt = new MQTT();
     ticker_init();
 
     const auto sleep_time   = seconds { 5 };
