@@ -1,4 +1,5 @@
 #include <string>
+#include <filesystem>
 
 #include <esp_event.h>
 #include <esp_event.h>
@@ -9,32 +10,51 @@
 #include "event.hh"
 #include "utils.hh"
 #include "mqtt_client.h"
+#include "mqtt.hh"
+#include "relay.hh"
 #include "net.hh"
 
 static const char* TAG = "MQTT";
-esp_mqtt_client_handle_t mqtt_client;
+
+// esp_mqtt_client_handle_t mqtt_client;
 bool mqtt_is_running = false;
-
-// Todo get the IP address from the configuration
-void mqtt_publish(std::string topic, int val) {
-    std::string root = "ss/data/";
-    // std::string ip = "10.11.44.21";
-    std::string path = root + net->mac2str() + "/" + topic;
-
-    char str[8];
-    sprintf(str, "%3.2f", (double) val / 10);
-    auto msg_id = esp_mqtt_client_publish(mqtt_client,
-                                          path.c_str(),
-                                          str, 0, 1, 0);
-    ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
-}
 
 // Handle incoming event data
 static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
 {
     ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-    printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-    printf("DATA=%.*s\r\n", event->data_len, event->data);
+    ESP_LOGI(TAG, "TOPIC=%.*s - %d\n", event->topic_len, event->topic, event->topic_len);
+    ESP_LOGI(TAG, "DATA=%.*s - %d\n", event->data_len, event->data, event->data_len);
+    char val[80];
+
+    event->data[event->data_len] = '\0';
+    strncpy(val, event->data, event->data_len);
+    val[event->data_len] = '\0';
+
+    event->topic[event->topic_len] = '\0';
+    char *s = strtok(event->topic, "/");
+    char *cmd = NULL;
+    while ((s = strtok(NULL, "/")) != NULL) {
+        cmd = s;
+    }
+
+    if (cmd == NULL) {
+        // poorly formed topic
+        ESP_LOGE(TAG, "MQTT non-path topic: %s\n", event->topic);
+        return;
+    }
+
+    // Need to move this into it's own function
+    if (strcmp(cmd, "relay") == 0) {
+        // we gotta relay
+        if (strncmp(val, "on", 2) == 0) {
+            relay->on();
+        } else if (strncmp(val, "off", 3) == 0) {
+            relay->off();
+        } else {
+            ESP_LOGE(TAG, "Invalid relay command: %s", val) ;
+        }
+    }
 
     // post a publication event
     // ESP_ERROR_CHECK(esp_event_post(TIMER_EVENTS, TIMER_EVENT_STOPPED, NULL, 0, portMAX_DELAY));
@@ -64,6 +84,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
 
+    std::string topic("ss/control/");
+    topic += net->mac2str() + "/+";
+
     switch ((esp_mqtt_event_id_t)event_id) {
 
     case MQTT_EVENT_CONNECTED:
@@ -75,8 +98,8 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         mqtt_is_running = true;
 
         // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
-        msg_id = esp_mqtt_client_subscribe(client, "ss/control/+/+", 0);
-        ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+        msg_id = esp_mqtt_client_subscribe(client, topic.c_str(), 0);
+        ESP_LOGI(TAG, "Connected subscribe to %s", topic.c_str());
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -117,13 +140,26 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     }
 }
 
-void mqtt_start()
+MQTT::MQTT()
 {
     // Get the broker from configuration structure
     esp_mqtt_client_config_t mqtt_cfg = {};
     mqtt_cfg.broker.address.uri = "mqtt://10.11.1.11"; // should be: CONFIG_BROKER_URL;
 
-    mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(mqtt_client, (esp_mqtt_event_id_t) ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
-    esp_mqtt_client_start(mqtt_client);
+    _client = esp_mqtt_client_init(&mqtt_cfg);
+    esp_mqtt_client_register_event(_client, (esp_mqtt_event_id_t) ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
+    esp_mqtt_client_start(_client);
+}
+
+// Todo get the IP address from the configuration
+void MQTT::publish(std::string topic, int val) {
+    std::string root = "ss/data/";
+    std::string path = root + net->mac2str() + "/" + topic;
+
+    char str[8];
+    sprintf(str, "%3.2f", (double) val / 10);
+    auto msg_id = esp_mqtt_client_publish(_client,
+                                          path.c_str(),
+                                          str, 0, 1, 0);
+    ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
 }

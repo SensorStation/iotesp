@@ -16,6 +16,7 @@ using namespace std::chrono;
 
 Net     *net = NULL;
 MQTT    *mqtt = NULL;
+Relay   *relay = NULL;
 
 extern "C" void app_main(void)
 {
@@ -26,6 +27,8 @@ extern "C" void app_main(void)
 
     mqtt = new MQTT();
     ticker_init();
+
+    relay = new Relay(5);
 
     const auto sleep_time   = seconds { 5 };
     while(true) {

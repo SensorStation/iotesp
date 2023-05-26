@@ -2,10 +2,10 @@
 
 #include "driver/gpio.h"
 
-const int OFF   = 0;
-const int ON    = 1;
+const int ON    = 0;
+const int OFF   = 1;
 
-const auto relay_pin    = 5;
+const auto relay_pin = 5;
 
 class Relay {
 private:    
@@ -13,15 +13,16 @@ private:
     bool        _isOn = false;
 
 public:
-    Relay(gpio_num_t p) {
-        _pin = p;
+    Relay(int p) {
+        _pin = (gpio_num_t) p;
         gpio_reset_pin(_pin);
         gpio_set_direction(_pin, GPIO_MODE_OUTPUT);
     }
 
-    void On()   { gpio_set_level( _pin, ON ); }
-    void Off()  { gpio_set_level( _pin, OFF ); }
+    void on()   { gpio_set_level( _pin, ON ); }
+    void off()  { gpio_set_level( _pin, OFF ); }
     
     bool IsOn() { return _isOn; }
 };
    
+extern Relay *relay; 
