@@ -9,7 +9,7 @@
 #include "event.hh"
 #include "net.hh"
 
-const char *TAG = "Net";
+static const char *TAG = "Net";
 
 Net::Net()
 {
@@ -28,6 +28,7 @@ Net::Net()
     ESP_ERROR_CHECK(example_connect());
 
     // TODO: Get IP Address and set to be used in mqtt messages
+    ESP_LOGI(TAG, "Network Started");
 }
 
 uint8_t *Net::get_mac()

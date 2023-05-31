@@ -1,8 +1,12 @@
+#include <esp_log.h>
+
 #include "sensor.hh"
 
 #include "dht.hh"
 #include "event.hh"
 #include "mqtt.hh"
+
+static const char *TAG = "Sensor";
 
 const gpio_num_t RELAY_PIN     = (gpio_num_t) 5;
 static const dht_sensor_type_t sensor_type = DHT_TYPE_AM2301;
@@ -10,7 +14,9 @@ static const gpio_num_t dht_gpio = (gpio_num_t)18;
 
 void sensor_reader_ticker(void *arg)
 {
+    ESP_LOGI(TAG, "ESP TICKER");
     if (mqtt->running() == false) {
+        ESP_LOGE(TAG, "ESP Not Running");
         return;
     }
 
@@ -22,7 +28,7 @@ void sensor_reader_ticker(void *arg)
     // while (1) {
     int16_t temperature;
     int16_t humidity;
-
+    
     auto err = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
     if (err != ESP_OK) {
         printf("Could not read data from sensor\n");
