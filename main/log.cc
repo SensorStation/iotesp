@@ -13,6 +13,7 @@ void log_init()
     ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
 
     esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_level_set("MQTT", ESP_LOG_INFO);
     esp_log_level_set("MQTT_CLIENT", ESP_LOG_WARN);
     esp_log_level_set("MQTT_EXAMPLE", ESP_LOG_WARN);
     esp_log_level_set("TRANSPORT_BASE", ESP_LOG_WARN);

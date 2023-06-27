@@ -4,8 +4,7 @@
 #include <thread>
 #include <chrono>
 
-#include "gtu7.hh"
-
+// #include "gtu7.hh"
 
 #include "event.hh"
 #include "log.hh"
@@ -19,22 +18,21 @@ using namespace std::chrono;
 
 Net     *net = NULL;
 MQTT    *mqtt = NULL;
-Relay   *relay = NULL;
-GTU7    *gps = NULL;
+Relays  relays;
+
 
 extern "C" void app_main(void)
 {
     log_init();
     net = new Net();
 
-    events_start();
+    events_init();
 
-    mqtt = new MQTT();
+    mqtt = new MQTT("10.11.1.11"); // use config broker
     ticker_init();
 
-    gps = new GPS();
-
-    relay = new Relay(5);
+    relays.add(5);
+    
 
     const auto sleep_time   = seconds { 5 };
     while(true) {
