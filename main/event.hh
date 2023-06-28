@@ -3,9 +3,10 @@
 #include <esp_event.h>
 
 // Declare an event base
+ESP_EVENT_DECLARE_BASE(CONTROL_EVENTS);
 ESP_EVENT_DECLARE_BASE(DATA_EVENTS);
 ESP_EVENT_DECLARE_BASE(TIMER_EVENTS); 
-ESP_EVENT_DECLARE_BASE(PUBLICATION_EVENTS);
+
 
 enum EVENT_TIMER_TYPE {
     EVENT_TIMER_STARTED,
@@ -13,18 +14,24 @@ enum EVENT_TIMER_TYPE {
     EVENT_TIMER_STOPPED
 };
 
-enum EVENT_PUBLICATION_TYPE {
-    EVENT_PUBLICATION_TEMPC,
-    EVENT_PUBLICATION_HUMIDITY,
-};
-
 enum EVENT_DATA_TYPE {
-    EVENT_DEVICE_RELAY_OFF,
-    EVENT_DEVICE_RELAY_ON,
+    EVENT_DATA_TEMPC,
+    EVENT_DATA_HUMIDITY,
 };
 
-struct event_value {
-    int16_t value;
+enum EVENT_CONTROL_TYPE {
+    EVENT_CONTROL_NONE,
+    EVENT_CONTROL_RELAY,
+    EVENT_CONTROL_SWITCH,
 };
 
-extern void events_start();
+union event_value {
+    int         i;
+    int8_t      i8;
+    int16_t     i16;
+    int32_t     i32;
+    bool        b;
+    void*       v;
+};
+
+extern void events_init();

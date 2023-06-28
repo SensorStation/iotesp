@@ -11,20 +11,31 @@
 #include "utils.hh"
 #include "mqtt_client.h"
 #include "mqtt.hh"
-#include "relay.hh"
 #include "net.hh"
+#include "msg.hh"
+#include "relay.hh"
+
 
 static const char* TAG = "MQTT";
 
 // esp_mqtt_client_handle_t mqtt_client;
-bool mqtt_is_running = false;
+// bool mqtt_is_running = false;
+
+static void mqtt_parse(char *topic, char *data)
+{
+    Msg msg(topic, data);
+    ESP_ERROR_CHECK(esp_event_post(CONTROL_EVENTS, EVENT_CONTROL_RELAY,
+                                   static_cast<void*> (&msg), sizeof(msg),
+                                   portMAX_DELAY));
+
+}
 
 // Handle incoming event data
 static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
 {
     ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-    ESP_LOGI(TAG, "TOPIC=%.*s - %d\n", event->topic_len, event->topic, event->topic_len);
-    ESP_LOGI(TAG, "DATA=%.*s - %d\n", event->data_len, event->data, event->data_len);
+    ESP_LOGI(TAG, "TOPIC=%.*s - %d", event->topic_len, event->topic, event->topic_len);
+    ESP_LOGI(TAG, "DATA=%.*s - %d", event->data_len, event->data, event->data_len);
     char val[80];
 
     event->data[event->data_len] = '\0';
@@ -32,38 +43,7 @@ static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
     val[event->data_len] = '\0';
 
     event->topic[event->topic_len] = '\0';
-    char *s = strtok(event->topic, "/");
-    char *cmd = NULL;
-    while ((s = strtok(NULL, "/")) != NULL) {
-        cmd = s;
-    }
-
-    if (cmd == NULL) {
-        // poorly formed topic
-        ESP_LOGE(TAG, "MQTT non-path topic: %s\n", event->topic);
-        return;
-    }
-
-    // Need to move this into it's own function
-    if (strcmp(cmd, "relay") == 0) {
-        // we gotta relay
-        if (strncmp(val, "on", 2) == 0) {
-            relay->on();
-        } else if (strncmp(val, "off", 3) == 0) {
-            relay->off();
-        } else {
-            ESP_LOGE(TAG, "Invalid relay command: %s", val) ;
-        }
-    }
-
-    // post a publication event
-    // ESP_ERROR_CHECK(esp_event_post(TIMER_EVENTS, TIMER_EVENT_STOPPED, NULL, 0, portMAX_DELAY));
-    // bool on = (bool) event->data;
-    // ESP_ERROR_CHECK(esp_event_post(PUBLICATION_EVENTS,
-    //                                EVENT_DEVICE_RELAY,
-    //                                static_cast<void*>(&t),
-    //                                sizeof(temperature),
-    //                                portMAX_DELAY));
+    mqtt_parse(event->topic, val);
 }
 
 /*
@@ -78,14 +58,10 @@ static void mqtt_incoming_data(esp_mqtt_event_handle_t event)
  */
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%ld", base, event_id);
+    ESP_LOGD(TAG, "Event dispatched handler_args: %p from event loop base=%s, event_id=%ld", handler_args, base, event_id);
 
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t) event_data;
     esp_mqtt_client_handle_t client = event->client;
-    int msg_id;
-
-    std::string topic("ss/control/");
-    topic += net->mac2str() + "/+";
 
     switch ((esp_mqtt_event_id_t)event_id) {
 
@@ -95,11 +71,13 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         // TODO make IP address configurable
         // TODO Publish charateristics of this sensor station
         // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
-        mqtt_is_running = true;
+        // mqtt_is_running = true;
+        mqtt->running(true);
 
         // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
-        msg_id = esp_mqtt_client_subscribe(client, topic.c_str(), 0);
-        ESP_LOGI(TAG, "Connected subscribe to %s", topic.c_str());
+        // msg_id = esp_mqtt_client_subscribe(client, topic.c_str(), 0);
+        mqtt->subscribe(client, "ss/"+net->mac2str()+"/control/#");
+        // ESP_LOGI(TAG, "Connected subscribe to %s", topic.c_str());
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -108,8 +86,8 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
     case MQTT_EVENT_SUBSCRIBED:
         ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
-        msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
-        ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+        esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
+        // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         mqtt->running(true);
         break;
 
@@ -118,7 +96,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         break;
 
     case MQTT_EVENT_PUBLISHED:
-        ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
+        // ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
         break;
 
     case MQTT_EVENT_DATA:
@@ -140,26 +118,38 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     }
 }
 
-MQTT::MQTT()
+MQTT::MQTT(string broker)
 {
     // Get the broker from configuration structure
     esp_mqtt_client_config_t mqtt_cfg = {};
-    mqtt_cfg.broker.address.uri = "mqtt://10.11.1.11"; // should be: CONFIG_BROKER_URL;
+    string mqtturl("mqtt://");
+    mqtturl += broker;
+
+    mqtt_cfg.broker.address.uri = mqtturl.c_str();
 
     _client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(_client, (esp_mqtt_event_id_t) ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
+    esp_mqtt_client_register_event(_client, (esp_mqtt_event_id_t) ESP_EVENT_ANY_ID, mqtt_event_handler, this);
     esp_mqtt_client_start(_client);
 }
 
 // Todo get the IP address from the configuration
 void MQTT::publish(std::string topic, int val) {
-    std::string root = "ss/data/";
-    std::string path = root + net->mac2str() + "/" + topic;
+    std::string root = "ss/";
+    std::string path = root + net->mac2str() + "/data/" + topic;
 
     char str[8];
     sprintf(str, "%3.2f", (double) val / 10);
-    auto msg_id = esp_mqtt_client_publish(_client,
-                                          path.c_str(),
-                                          str, 0, 1, 0);
-    ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
+    /*auto msg_id =*/
+    esp_mqtt_client_publish(_client, path.c_str(), str, 0, 1, 0);
+    // ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
+}
+
+void MQTT::subscribe(esp_mqtt_client_handle_t c, std::string topic)
+{
+    _subscriptions.push_back(topic);
+    if (_running) {
+        ESP_LOGI(TAG, "Subscribe to %s", topic.c_str());
+        esp_mqtt_client_subscribe(c, topic.c_str(), 0);
+        _client = c;
+    }
 }

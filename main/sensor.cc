@@ -31,25 +31,25 @@ void sensor_reader_ticker(void *arg)
     
     auto err = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
     if (err != ESP_OK) {
-        printf("Could not read data from sensor\n");
+        ESP_LOGE(TAG, "Could not read data from sensor\n");
         return;
     }
     event_value t;
     event_value h;
 
-    t.value = temperature;
-    h.value = humidity;
+    t.i16 = temperature;
+    h.i16 = humidity;
 
     // post a publication event
     // ESP_ERROR_CHECK(esp_event_post(TIMER_EVENTS, TIMER_EVENT_STOPPED, NULL, 0, portMAX_DELAY));
-    ESP_ERROR_CHECK(esp_event_post(PUBLICATION_EVENTS,
-                                   EVENT_PUBLICATION_TEMPC,
+    ESP_ERROR_CHECK(esp_event_post(DATA_EVENTS,
+                                   EVENT_DATA_TEMPC,
                                    static_cast<void*>(&t),
                                    sizeof(temperature),
                                    portMAX_DELAY));
 
-    ESP_ERROR_CHECK(esp_event_post(PUBLICATION_EVENTS,
-                                   EVENT_PUBLICATION_HUMIDITY,
+    ESP_ERROR_CHECK(esp_event_post(DATA_EVENTS,
+                                   EVENT_DATA_HUMIDITY,
                                    static_cast<void *>(&h),
                                    sizeof(humidity),
                                    portMAX_DELAY));

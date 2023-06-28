@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <esp_log.h>
+
 #include "driver/gpio.h"
 
 const int ON    = 0;
@@ -10,19 +13,29 @@ const auto relay_pin = 5;
 class Relay {
 private:    
     gpio_num_t  _pin;
-    bool        _isOn = false;
+    bool        _is_on = false;
 
 public:
-    Relay(int p) {
-        _pin = (gpio_num_t) p;
-        gpio_reset_pin(_pin);
-        gpio_set_direction(_pin, GPIO_MODE_OUTPUT);
-    }
+    Relay(int p);
 
-    void on()   { gpio_set_level( _pin, ON ); }
-    void off()  { gpio_set_level( _pin, OFF ); }
+    void on();
+    void off();
     
-    bool IsOn() { return _isOn; }
+    bool is_on();
 };
    
-extern Relay *relay; 
+const int RELAY_MAX = 4;
+class Relays
+{
+private:
+    Relay*      _relays[RELAY_MAX];
+    int         _relay_count;
+    
+public:
+    Relays();
+
+    int add(int pin);
+    Relay* get(int idx);
+};
+
+extern Relays relays;
