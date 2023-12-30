@@ -42,9 +42,10 @@ uint8_t *Net::get_mac()
 std::string Net::mac2str()
 {
     if (macstr.length() < 1) {
+        auto mac = get_mac();
         char str[18];
         snprintf(str, 18, "%02x:%02x:%02x:%02x:%02x:%02x",
-                 _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
+                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         macstr = str;
     }    
     

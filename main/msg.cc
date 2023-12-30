@@ -1,6 +1,6 @@
 #include "msg.hh"
 
-const char *TAG = "MSG";
+static const char *TAG = "MSG";
 
 Msg::Msg(char *topic, char *data)
 {

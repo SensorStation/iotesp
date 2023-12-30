@@ -132,6 +132,16 @@ MQTT::MQTT(string broker)
     esp_mqtt_client_start(_client);
 }
 
+void MQTT::subscribe(esp_mqtt_client_handle_t c, std::string topic)
+{
+    _subscriptions.push_back(topic);
+    if (_running) {
+        ESP_LOGI(TAG, "Subscribe to %s", topic.c_str());
+        esp_mqtt_client_subscribe(c, topic.c_str(), 0);
+        _client = c;
+    }
+}
+
 // Todo get the IP address from the configuration
 void MQTT::publish(std::string topic, int val) {
     std::string root = "ss/";
@@ -144,12 +154,11 @@ void MQTT::publish(std::string topic, int val) {
     // ESP_LOGI(TAG, "periodic timer publish, msg_id=%d", msg_id);
 }
 
-void MQTT::subscribe(esp_mqtt_client_handle_t c, std::string topic)
-{
-    _subscriptions.push_back(topic);
-    if (_running) {
-        ESP_LOGI(TAG, "Subscribe to %s", topic.c_str());
-        esp_mqtt_client_subscribe(c, topic.c_str(), 0);
-        _client = c;
-    }
+// Todo get the IP address from the configuration
+void MQTT::publish(std::string topic, std::string val) {
+    std::string root = "ss/d/";
+    std::string path = root + net->mac2str() + "/" + topic;
+
+    esp_mqtt_client_publish(_client, path.c_str(), val.c_str(), 0, 1, 0);
 }
+

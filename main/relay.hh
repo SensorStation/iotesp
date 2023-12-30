@@ -1,6 +1,9 @@
 #pragma once
 
 #include <array>
+#include <map>
+#include <string>
+
 #include <esp_log.h>
 
 #include "driver/gpio.h"
@@ -11,31 +14,37 @@ const int OFF   = 1;
 const auto relay_pin = 5;
 
 class Relay {
-private:    
+private:
+    std::string _id;
     gpio_num_t  _pin;
     bool        _is_on = false;
 
+    std::string _json;
+
 public:
-    Relay(int p);
+    Relay(int p, std::string id);
 
     void on();
     void off();
     
     bool is_on();
+
+    std::string json();
 };
    
-const int RELAY_MAX = 4;
 class Relays
 {
 private:
-    Relay*      _relays[RELAY_MAX];
-    int         _relay_count;
-    
+    std::map<std::string, Relay*> _relays;
+    std::string _json;
+
 public:
     Relays();
 
-    int add(int pin);
-    Relay* get(int idx);
+    void add(int pin, std::string name);
+
+    Relay* get(std::string name);
+    std::string json();
 };
 
 extern Relays relays;

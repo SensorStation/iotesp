@@ -3,6 +3,7 @@
 #include "msg.hh"
 #include "event.hh"
 #include "mqtt.hh"
+#include "station.hh"
 #include "relay.hh"
 
 /* Event source periodic timer related definitions */
@@ -12,7 +13,7 @@ ESP_EVENT_DEFINE_BASE(TIMER_EVENTS);
 
 static const char *TAG = "StationEvents";
 
-static char* get_id_string(esp_event_base_t base, int32_t id) {
+char* get_id_string(esp_event_base_t base, int32_t id) {
     char* event = (char *)"";
 
     if (base == TIMER_EVENTS) {
@@ -33,12 +34,8 @@ static char* get_id_string(esp_event_base_t base, int32_t id) {
     } else if (base == DATA_EVENTS) {
 
         switch (id) {
-        case EVENT_DATA_TEMPC:
-            event = (char *) "EVENT_PUBLICATION_TEMPC";
-            break;
-
-        case EVENT_DATA_HUMIDITY:
-            event = (char *) "EVENT_PUBLICATION_HUMIDITY";
+        case EVENT_DATA_STATION:
+            event = (char *) "EVENT_PUBLICATION_STATION";
             break;
         }
 
@@ -74,7 +71,12 @@ static void control_handler(void* handler_args, esp_event_base_t base, int32_t i
         return;
     }
 
-    Relay *relay = relays.get(msg->index);
+    if (station->relays == NULL) {
+        ESP_LOGW(TAG, "control_handler relay called but no relays found");
+        return;
+    }
+
+    Relay *relay = station->relays->get(msg->device);
     if (relay == NULL) {
         ESP_LOGW(TAG, "control_handler bad relay index %ld", msg->index);
         return;
@@ -95,35 +97,8 @@ static void control_handler(void* handler_args, esp_event_base_t base, int32_t i
     }
 }
 
-static void data_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
-{
-    event_value *val = static_cast<event_value*>(event_data);
-    ESP_LOGI(TAG, "%s:%s - %d: data_handler", base, get_id_string(base, id), val->i);
-
-    if (base != DATA_EVENTS) {
-        ESP_LOGW(TAG, "unwanted event: %s:%s - %d: data_handler", base, get_id_string(base, id), val->i);
-        return;
-    }
-
-    switch (id) {
-    case EVENT_DATA_TEMPC:
-        mqtt->publish("tempc", val->i16);
-        break;
-
-    case EVENT_DATA_HUMIDITY:
-        mqtt->publish("humidity", val->i16);
-        break;
-
-    default:
-        ESP_LOGW(TAG, "unknow event id: %s:%s - %d: data_handler", base, get_id_string(base, id), val->i);
-        return;
-    }
-}
-
 void events_init()
 {
     // Create the default event loop
-    ESP_ERROR_CHECK(esp_event_handler_register(DATA_EVENTS, EVENT_DATA_TEMPC, data_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(DATA_EVENTS, EVENT_DATA_HUMIDITY, data_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(CONTROL_EVENTS, EVENT_CONTROL_RELAY, control_handler, NULL));
 }

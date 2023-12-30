@@ -15,7 +15,7 @@ enum EVENT_TIMER_TYPE {
 };
 
 enum EVENT_DATA_TYPE {
-    EVENT_DATA_TEMPC,
+    EVENT_DATA_STATION,
     EVENT_DATA_HUMIDITY,
 };
 
@@ -25,13 +25,5 @@ enum EVENT_CONTROL_TYPE {
     EVENT_CONTROL_SWITCH,
 };
 
-union event_value {
-    int         i;
-    int8_t      i8;
-    int16_t     i16;
-    int32_t     i32;
-    bool        b;
-    void*       v;
-};
-
 extern void events_init();
+extern char* get_id_string(esp_event_base_t base, int32_t id);

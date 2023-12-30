@@ -16,7 +16,8 @@ Station::Station() {
     dht = new DHT((gpio_num_t)18);
     _id = net->mac2str();
 
-    printf("DHT: %p - _id: %s\n", dht, _id.c_str());
+    relays = new Relays();
+    relays->add(5, "switch1");
 }
 
 void dht_read_data(void *arg)
@@ -50,10 +51,14 @@ void Station::start_reading()
     ESP_ERROR_CHECK(esp_event_handler_register(DATA_EVENTS, EVENT_DATA_STATION, station_handler, this));
 }
 
-char *Station::json()
+std::string Station::json()
 {
-    sprintf(_json, "{ \"id\": \"%s\", \"tempf\": %6.2f, \"humidity\": %6.2f}",
-            _id.c_str(), dht->get_tempf(), dht->get_humidity());
+    char j[256];
+    sprintf(j, "{ \"id\": \"%s\", \"sensors\": ", _id.c_str());
+    _json = std::string(j);
+    _json += dht->json() + ", ";
+    _json += "\"relays\": " + relays->json();
+    _json += "}";
     return _json;
 }
 

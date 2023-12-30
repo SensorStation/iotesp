@@ -7,6 +7,5 @@ idf_component_register(SRCS
         event.cc
         net.cc
         relay.cc
-        sensor.cc
-        ticker.cc
+        station.cc
         INCLUDE_DIRS ".")

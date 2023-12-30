@@ -1,8 +1,10 @@
 #include "relay.hh"
 
-Relay::Relay(int p)
+Relay::Relay(int p, std::string id)
 {
     _pin = (gpio_num_t) p;
+    _id = id;
+
     gpio_reset_pin(_pin);
     gpio_set_direction(_pin, GPIO_MODE_OUTPUT);
 }
@@ -21,27 +23,45 @@ void Relay::off()
 
 bool Relay::is_on()
 {
+    _is_on = gpio_get_level(_pin);
     return _is_on;
 }
 
+std::string Relay::json()
+{
+    char j[256];
+    sprintf(j, "\"%s\": %s", _id.c_str(), is_on() ? "true" : "false" );
+
+    return _json = std::string(j);
+}
+
+
 Relays::Relays()
 {
-    for (int i = 0; i < RELAY_MAX; i++) {
-        _relays[i] = NULL;
-    }
 }
 
-int Relays::add(int pin)
+void Relays::add(int pin, std::string id)
 {
-    _relays[_relay_count] = new Relay(pin);
-    _relay_count++;
-    return _relay_count - 1;
+    _relays[id] = new Relay(pin, id);
 }
 
-Relay* Relays::get(int idx)
+Relay* Relays::get(std::string id)
 {
-    if (idx > _relay_count) {
-        return NULL;
+    return _relays[id];
+}
+
+std::string Relays::json()
+{
+    _json = std::string("{");
+    bool first = true;
+    for (auto const& [k, r] : _relays) {
+        if (first) {
+            first = false;
+        } else {
+            _json += ",";
+        }
+        _json += r->json();
     }
-    return _relays[idx];
+    _json += "}";
+    return (_json);
 }

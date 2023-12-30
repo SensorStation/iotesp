@@ -24,7 +24,8 @@ const int MAX_ARRAY_ELEMENTS = 10;
 struct Msg
 {
 public:
-    Device      device;
+    // Device      device;
+    string      device;
     Category    category;
     string      source;
     uint32_t    index;

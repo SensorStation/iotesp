@@ -46,6 +46,8 @@
 #ifndef __DHT_H__
 #define __DHT_H__
 
+#include <string>
+
 #include <driver/gpio.h>
 #include <esp_err.h>
 
@@ -97,8 +99,32 @@ esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type,
                               gpio_num_t pin,
                               float *humidity,
                               float *temperature);
-
 #ifdef __cplusplus
+
+// C++ Class wrapper around DHT sensor    
+class DHT
+{
+private:
+    float _humidity = 0.0;
+    float _tempc = 0.0;
+
+    gpio_num_t          _pin;
+    dht_sensor_type_t   _sensor_type = DHT_TYPE_AM2301;
+
+    std::string         _json;
+
+public:
+    DHT(gpio_num_t p) { _pin = p; }
+
+    void read_data();    
+
+    float get_humidity()        { return _humidity; }
+    float get_tempc()           { return _tempc; }
+    float get_tempf()           { return (_tempc * 9/5) + 32; }
+
+    std::string json();
+};
+
 }
 #endif
 

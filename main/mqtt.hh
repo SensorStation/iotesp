@@ -21,6 +21,8 @@ public:
     void subscribe(esp_mqtt_client_handle_t c, string topic);
 
     void publish(std::string topic, int val);
+    void publish(std::string topic, std::string val);
+
     bool running() { return _running; }
     bool running(bool v) { _running = v; return _running; }
 };

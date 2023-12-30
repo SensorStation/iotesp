@@ -12,14 +12,14 @@
 #include "net.hh"
 #include "ticker.hh"
 
+#include "station.hh"
 #include "relay.hh"
 
 using namespace std::chrono;
 
 Net     *net = NULL;
 MQTT    *mqtt = NULL;
-Relays  relays;
-
+Station *station = NULL;
 
 extern "C" void app_main(void)
 {
@@ -27,12 +27,10 @@ extern "C" void app_main(void)
     net = new Net();
 
     events_init();
-
     mqtt = new MQTT("10.11.1.11"); // use config broker
-    ticker_init();
 
-    relays.add(5);
-    
+    station = new Station();
+    station->start_reading();
 
     const auto sleep_time   = seconds { 5 };
     while(true) {

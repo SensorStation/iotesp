@@ -271,3 +271,23 @@ esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
 
     return ESP_OK;
 }
+
+// ********************************************************************************************
+// C++ class wrapper
+// ********************************************************************************************
+#include <esp_event.h>
+
+void DHT::read_data()
+{
+    esp_err_t err = dht_read_float_data(_sensor_type, _pin, &_humidity, &_tempc);
+    if (err != ESP_OK) {
+         return;
+    }
+}
+
+std::string DHT::json()
+{
+    char j[256];
+    sprintf(j, "{\"tempf\": %3.2f, \"humidity\": %.2f}", get_tempf(), _humidity);
+    return _json = std::string(j);
+}

@@ -11,17 +11,16 @@ class Station
 private:
     std::string _id;
     std::string _ipaddr;
-
-    char _json[256];
+    std::string _json;
 
 public:
     Station();
 
-    DHT *dht;
-    Relays *relays;
+    DHT         *dht;
+    Relays      *relays;
 
     void start_reading();
-    char *json();
+    std::string json();
 };
 
 extern Station *station;
