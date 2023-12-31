@@ -78,7 +78,7 @@ static void control_handler(void* handler_args, esp_event_base_t base, int32_t i
 
     Relay *relay = station->relays->get(msg->device);
     if (relay == NULL) {
-        ESP_LOGW(TAG, "control_handler bad relay index %ld", msg->index);
+        ESP_LOGW(TAG, "control_handler bad relay device %s", msg->device.c_str());
         return;
     }
 

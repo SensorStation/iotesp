@@ -11,23 +11,23 @@ Msg::Msg(char *topic, char *data)
 
         switch (i) {
         case 1:
-            source = string(tok);
-            break;
-
-        case 2:
-            if (string(tok) == "control") {
+            if (string(tok) == "c") {
                 category = CONTROL;
             }
             break;
 
+        case 2:
+            source = string(tok);
+            break;
+
         case 3:
             if (string(tok) == "relay") {
-                device = RELAY;
+                dtype = RELAY;
             }
             break;
 
         case 4:
-            index = stoi(tok);
+            device = string(tok);
             break;
         }
     }

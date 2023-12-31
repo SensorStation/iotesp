@@ -25,9 +25,10 @@ struct Msg
 {
 public:
     // Device      device;
-    string      device;
     Category    category;
     string      source;
+    string      dtype;
+    string      device;
     uint32_t    index;
     
     bool        on;

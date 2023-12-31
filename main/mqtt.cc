@@ -76,7 +76,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
         // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
         // msg_id = esp_mqtt_client_subscribe(client, topic.c_str(), 0);
-        mqtt->subscribe(client, "ss/"+net->mac2str()+"/control/#");
+        mqtt->subscribe(client, "ss/c/"+net->mac2str()+"/relay/#");
         // ESP_LOGI(TAG, "Connected subscribe to %s", topic.c_str());
         break;
 

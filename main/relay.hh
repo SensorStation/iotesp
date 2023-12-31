@@ -5,8 +5,9 @@
 #include <string>
 
 #include <esp_log.h>
-
-#include "driver/gpio.h"
+#include <driver/gpio.h>
+#include <rom/gpio.h>
+#include <soc/gpio_reg.h>
 
 const int ON    = 0;
 const int OFF   = 1;
@@ -17,8 +18,7 @@ class Relay {
 private:
     std::string _id;
     gpio_num_t  _pin;
-    bool        _is_on = false;
-
+    bool        _state = false;
     std::string _json;
 
 public:
@@ -26,8 +26,7 @@ public:
 
     void on();
     void off();
-    
-    bool is_on();
+    bool state();
 
     std::string json();
 };
