@@ -156,9 +156,9 @@ static inline esp_err_t dht_fetch_data(dht_sensor_type_t sensor_type, gpio_num_t
 
     // Phase 'A' pulling signal low to initiate read sequence
     gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD);
-    gpio_set_level(pin, 0);
+    gpio_set_level(pin, false);
     ets_delay_us(sensor_type == DHT_TYPE_SI7021 ? 500 : 20000);
-    gpio_set_level(pin, 1);
+    gpio_set_level(pin, true);
 
     // Step through Phase 'B', 40us
     CHECK_LOGE(dht_await_pin_state(pin, 40, 0, NULL),

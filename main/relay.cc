@@ -8,27 +8,20 @@ Relay::Relay(int p, std::string id)
 
     gpio_reset_pin(_pin);
     gpio_set_direction(_pin, GPIO_MODE_OUTPUT);
-
-    gpio_num_t pin = (gpio_num_t)(_pin & 0x1F);
-
-    // XXX - this is supposed to read the value of an output pin
-    // so we know what state we are outputing.
-    if (GPIO_REG_READ(GPIO_ENABLE_REG) & BIT(pin)) {
-	_state = (GPIO_REG_READ(GPIO_OUT_REG)  >> _pin) & 1U;
-    }
-    
 }
 
 void Relay::on()
 {
     _state = true;
-    gpio_set_level( _pin, ON );
+    printf("relay %s - %d - %d\n", _id.c_str(), _pin, _state);
+    gpio_set_level( _pin, _state );
 }
 
 void Relay::off()
 {
     _state = false;
-    gpio_set_level( _pin, OFF );
+    printf("relay %s - %d - %d\n", _id.c_str(), _pin, _state);
+    gpio_set_level( _pin, _state );
 }
 
 bool Relay::state()
