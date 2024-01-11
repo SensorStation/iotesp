@@ -196,6 +196,7 @@ static inline esp_err_t dht_fetch_data(dht_sensor_type_t sensor_type, gpio_num_t
  */
 static inline int16_t dht_convert_data(dht_sensor_type_t sensor_type, uint8_t msb, uint8_t lsb)
 {
+
     int16_t data;
 
     if (sensor_type == DHT_TYPE_DHT11)

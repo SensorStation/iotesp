@@ -13,7 +13,7 @@ Station::Station() {
     // Initialize DHT with proper pin
     // Initialize relays with proper pin(s)
     // register station handler
-    dht = new DHT((gpio_num_t)15);
+    dht = new DHT((gpio_num_t) 23);
     _id = net->mac2str();
 
     relays = new Relays();
