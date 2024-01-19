@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-// #include "gtu7.hh"
+#include "oled.hh"
 
 #include "event.hh"
 #include "log.hh"
@@ -24,13 +24,16 @@ Station *station = NULL;
 extern "C" void app_main(void)
 {
     log_init();
-    net = new Net();
 
+    OLED *oled = new OLED();
+    
+    net = new Net();
     events_init();
     mqtt = new MQTT("10.11.1.11"); // use config broker
 
     station = new Station();
     station->start_reading();
+
 
     const auto sleep_time   = seconds { 5 };
     while(true) {
