@@ -109,7 +109,7 @@ private:
     float _tempc = 0.0;
 
     gpio_num_t          _pin;
-    dht_sensor_type_t   _sensor_type = DHT_TYPE_AM2301;
+    dht_sensor_type_t   _sensor_type = DHT_TYPE_DHT11;
 
     std::string         _json;
 
