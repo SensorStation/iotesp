@@ -5,6 +5,7 @@
 #include "mqtt.hh"
 #include "station.hh"
 #include "relay.hh"
+#include "globals.hh"
 
 /* Event source periodic timer related definitions */
 ESP_EVENT_DEFINE_BASE(DATA_EVENTS);
