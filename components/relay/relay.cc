@@ -13,14 +13,12 @@ Relay::Relay(int p, std::string id)
 void Relay::on()
 {
     _state = true;
-    printf("relay %s - %d - %d\n", _id.c_str(), _pin, _state);
     gpio_set_level( _pin, _state );
 }
 
 void Relay::off()
 {
     _state = false;
-    printf("relay %s - %d - %d\n", _id.c_str(), _pin, _state);
     gpio_set_level( _pin, _state );
 }
 
@@ -36,7 +34,6 @@ std::string Relay::json()
 
     return _json = std::string(j);
 }
-
 
 Relays::Relays()
 {

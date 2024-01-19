@@ -23,4 +23,3 @@ public:
     std::string json();
 };
 
-extern Station *station;
