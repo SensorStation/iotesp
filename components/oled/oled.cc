@@ -7,7 +7,7 @@ extern "C" {
 // #include "esp_lcd_panel_io.h"
 // #include "esp_lcd_panel_ops.h"
 
-// #include "lvgl.h"
+#include "lvgl.h"
 // #include "esp_lvgl_port.h"
 // #include "esp_lcd_panel_vendor.h"
 
@@ -35,10 +35,7 @@ void OLED::update_info(std::string text)
 {
     // Lock the mutex due to the LVGL APIs are not thread-safe
     if (lvgl_port_lock(0)) {
-        // _scr_info = lv_disp_get_scr_act(_disp);
         lv_scr_load(_scr_info);
-
-        // lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
         lv_obj_t *label = lv_label_create(_scr_info);
         lv_label_set_text(label, text.c_str());
         lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
@@ -51,17 +48,16 @@ void OLED::update_temp(std::string tempf, std::string hum)
 {
     // Lock the mutex due to the LVGL APIs are not thread-safe
     if (lvgl_port_lock(0)) {
-        // _scr_temp = lv_disp_get_scr_act(_disp);
         lv_scr_load(_scr_temp);
-
-        // lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+        
         lv_obj_t *temp_label = lv_label_create(_scr_temp);
         lv_label_set_text(temp_label, tempf.c_str());
-        lv_obj_align(temp_label, LV_ALIGN_TOP_MID, 0, 0);
+        lv_obj_align(temp_label, LV_ALIGN_TOP_MID, 0, 2);
 
         lv_obj_t *hum_label = lv_label_create(_scr_temp);
         lv_label_set_text(hum_label, hum.c_str());
-        lv_obj_align(hum_label, LV_ALIGN_CENTER, 0, 0);
+        lv_obj_set_height(hum_label, lv_pct(70));
+        lv_obj_align(hum_label, 0, 20, 20);
         lvgl_port_unlock();     // Release the mutex
     }
 

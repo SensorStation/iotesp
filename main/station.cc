@@ -22,7 +22,7 @@ Station::Station() {
     relays->add(5, "green");
 
     oled = new OLED(22, 21);
-    oled->update_info("Waiting for data");
+    oled->update_info(_id);
 }
 
 void dht_read_data(void *arg)
@@ -70,7 +70,7 @@ void Station::update_display()
 {
     char t[80], h[80];
     snprintf(t, 80, "%3.2f", dht->get_tempf());
-    snprintf(h, 80, "%3.2f", dht->get_humidity());
+    snprintf(h, 80, "%3.2f%%", dht->get_humidity());
 
     oled->update_temp(t, h);
 }
