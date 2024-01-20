@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-// #include "gtu7.hh"
+#include "oled.hh"
 
 #include "event.hh"
 #include "log.hh"
@@ -19,6 +19,7 @@ using namespace std::chrono;
 
 Net     *net = NULL;
 MQTT    *mqtt = NULL;
+
 Station *station = NULL;
 
 extern "C" void app_main(void)
@@ -26,11 +27,15 @@ extern "C" void app_main(void)
     log_init();
     net = new Net();
 
-    events_init();
+    std::string text("Station: ");
+    text += net->mac2str();
+    
     mqtt = new MQTT("10.11.1.11"); // use config broker
 
     station = new Station();
     station->start_reading();
+
+    events_init();
 
     const auto sleep_time   = seconds { 5 };
     while(true) {

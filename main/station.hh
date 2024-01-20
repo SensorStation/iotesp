@@ -5,6 +5,7 @@
 
 #include "dht.hh"
 #include "relay.hh"
+#include "oled.hh"
 
 class Station
 {
@@ -18,6 +19,9 @@ public:
 
     DHT         *dht;
     Relays      *relays;
+    OLED        *oled;
+
+    void update_display();
 
     void start_reading();
     std::string json();
