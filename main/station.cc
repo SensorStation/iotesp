@@ -20,6 +20,9 @@ Station::Station() {
     relays->add(2, "red");
     relays->add(4, "yellow");
     relays->add(5, "green");
+
+    oled = new OLED(22, 21);
+    oled->update_info("Waiting for data");
 }
 
 void dht_read_data(void *arg)
@@ -49,7 +52,6 @@ void Station::start_reading()
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 5000000)); 
-
     ESP_ERROR_CHECK(esp_event_handler_register(DATA_EVENTS, EVENT_DATA_STATION, station_handler, this));
 }
 
@@ -64,12 +66,18 @@ std::string Station::json()
     return _json;
 }
 
+void Station::update_display()
+{
+    char t[80], h[80];
+    snprintf(t, 80, "%3.2f", dht->get_tempf());
+    snprintf(h, 80, "%3.2f", dht->get_humidity());
+
+    oled->update_temp(t, h);
+}
 
 static void station_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
-    // Station *station = static_cast<Station*>(event_data);
     Station *station = (Station *) handler_args;
-    // ESP_LOGI(TAG, "%s:%s - %d: data_handler", base, get_id_string(base, id), val->i);
     if (base != DATA_EVENTS) {
         ESP_LOGW(TAG, "unwanted event: %s:%s: data_handler", base, get_id_string(base, id));
         return;
@@ -78,6 +86,7 @@ static void station_handler(void* handler_args, esp_event_base_t base, int32_t i
     switch (id) {
     case EVENT_DATA_STATION:
         mqtt->publish("station", station->json());
+        station->update_display();
         break;
 
     default:

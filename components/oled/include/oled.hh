@@ -18,10 +18,12 @@ private:
     int _i2c_sda;
 
     lv_disp_t *_disp = NULL;
+    lv_obj_t  *_scr_info = NULL;
+    lv_obj_t  *_scr_temp = NULL;
 
 public:
     OLED(int clk, int sda);
 
-    void rotation(std::string);
-    void display(std::string);
+    void update_info(std::string text);
+    void update_temp(std::string temp, std::string hum);
 };

@@ -49,10 +49,6 @@ static const char *TAG = "example";
 
 extern void example_lvgl_demo_ui(lv_disp_t *disp);
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 lv_disp_t *oled_init(int pin_i2c_clk, int pin_i2c_data)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
@@ -131,7 +127,3 @@ lv_disp_t *oled_init(int pin_i2c_clk, int pin_i2c_data)
     lv_disp_t * disp = lvgl_port_add_disp(&disp_cfg);
     return disp;
 }
-
-// #ifdef __cplusplus
-// }
-// #endif

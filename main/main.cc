@@ -19,22 +19,23 @@ using namespace std::chrono;
 
 Net     *net = NULL;
 MQTT    *mqtt = NULL;
+
 Station *station = NULL;
 
 extern "C" void app_main(void)
 {
     log_init();
-
-    OLED *oled = new OLED(22, 21);
-    oled->display("Rusty is a super hero!");
-
     net = new Net();
-    events_init();
+
+    std::string text("Station: ");
+    text += net->mac2str();
+    
     mqtt = new MQTT("10.11.1.11"); // use config broker
 
     station = new Station();
     station->start_reading();
 
+    events_init();
 
     const auto sleep_time   = seconds { 5 };
     while(true) {

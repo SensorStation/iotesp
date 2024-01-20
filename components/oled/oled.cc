@@ -20,27 +20,48 @@ OLED::OLED(int clk, int sda)
     _i2c_clk = clk;
     _i2c_sda = sda;
     _disp = oled_init(_i2c_clk, _i2c_sda);
-}
 
-void OLED::rotation(std::string text)
-{
-    lv_obj_t *scr = lv_disp_get_scr_act(_disp);
-    lv_obj_t *label = lv_label_create(scr);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
-    lv_label_set_text(label, text.c_str());
-    /* Size of the screen (if you use rotation 90 or 270, please set disp->driver->ver_res) */
-    lv_obj_set_width(label, _disp->driver->hor_res);
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
-}
-
-void OLED::display(std::string text)
-{
-    /* Rotation of the screen */
+    /* Set rotation of the screen */
     lv_disp_set_rotation(_disp, LV_DISP_ROT_NONE);
+    if (lvgl_port_lock(0)) {
+        _scr_info = lv_disp_get_scr_act(_disp);
+        _scr_temp = lv_obj_create(_scr_info);
 
+        lvgl_port_unlock();     // Release the mutex
+    }
+}
+
+void OLED::update_info(std::string text)
+{
     // Lock the mutex due to the LVGL APIs are not thread-safe
     if (lvgl_port_lock(0)) {
-        rotation(text);
+        // _scr_info = lv_disp_get_scr_act(_disp);
+        lv_scr_load(_scr_info);
+
+        // lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+        lv_obj_t *label = lv_label_create(_scr_info);
+        lv_label_set_text(label, text.c_str());
+        lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
+        lv_obj_set_width(label, _disp->driver->hor_res);
+        lvgl_port_unlock();     // Release the mutex
+    }
+}
+
+void OLED::update_temp(std::string tempf, std::string hum)
+{
+    // Lock the mutex due to the LVGL APIs are not thread-safe
+    if (lvgl_port_lock(0)) {
+        // _scr_temp = lv_disp_get_scr_act(_disp);
+        lv_scr_load(_scr_temp);
+
+        // lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+        lv_obj_t *temp_label = lv_label_create(_scr_temp);
+        lv_label_set_text(temp_label, tempf.c_str());
+        lv_obj_align(temp_label, LV_ALIGN_TOP_MID, 0, 0);
+
+        lv_obj_t *hum_label = lv_label_create(_scr_temp);
+        lv_label_set_text(hum_label, hum.c_str());
+        lv_obj_align(hum_label, LV_ALIGN_CENTER, 0, 0);
         lvgl_port_unlock();     // Release the mutex
     }
 
