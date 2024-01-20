@@ -25,8 +25,9 @@ extern "C" void app_main(void)
 {
     log_init();
 
-    OLED *oled = new OLED();
-    
+    OLED *oled = new OLED(22, 21);
+    oled->display("Rusty is a super hero!");
+
     net = new Net();
     events_init();
     mqtt = new MQTT("10.11.1.11"); // use config broker

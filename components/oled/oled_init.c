@@ -53,7 +53,7 @@ extern void example_lvgl_demo_ui(lv_disp_t *disp);
 // extern "C" {
 // #endif
 
-void oled_init(void)
+lv_disp_t *oled_init(int pin_i2c_clk, int pin_i2c_data)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_config_t i2c_conf = {
@@ -129,17 +129,7 @@ void oled_init(void)
         }
     };
     lv_disp_t * disp = lvgl_port_add_disp(&disp_cfg);
-
-    /* Rotation of the screen */
-    lv_disp_set_rotation(disp, LV_DISP_ROT_NONE);
-
-    ESP_LOGI(TAG, "Display LVGL Scroll Text");
-    // Lock the mutex due to the LVGL APIs are not thread-safe
-    if (lvgl_port_lock(0)) {
-        example_lvgl_demo_ui(disp);
-        // Release the mutex
-        lvgl_port_unlock();
-    }
+    return disp;
 }
 
 // #ifdef __cplusplus
