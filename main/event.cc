@@ -14,6 +14,10 @@ ESP_EVENT_DEFINE_BASE(TIMER_EVENTS);
 
 static const char *TAG = "StationEvents";
 
+Events::Events()
+{
+}
+
 char* get_id_string(esp_event_base_t base, int32_t id) {
     char* event = (char *)"";
 
@@ -63,6 +67,8 @@ char* get_id_string(esp_event_base_t base, int32_t id) {
 
 static void control_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
+    events = (Events *) handler_args;
+
     // event_value *val = static_cast<event_value*>(event_data);
     Msg *msg = static_cast<Msg*>(event_data);
     ESP_LOGI(TAG, "%s:%s msg %p", base, get_id_string(base, id), msg);
@@ -98,8 +104,8 @@ static void control_handler(void* handler_args, esp_event_base_t base, int32_t i
     }
 }
 
-void events_init()
+void Events::start()
 {
     // Create the default event loop
-    ESP_ERROR_CHECK(esp_event_handler_register(CONTROL_EVENTS, EVENT_CONTROL_RELAY, control_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(CONTROL_EVENTS, EVENT_CONTROL_RELAY, control_handler, this));
 }

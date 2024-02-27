@@ -4,8 +4,10 @@
 <img src="https://lvgl.io/assets/images/lvgl_widgets_demo.gif">
 </p>
 
-<p align="center">
-LVGL provides everything you need to create an embedded GUI with easy-to-use graphical elements, beautiful visual effects and a low memory footprint.
+<p align="center"> 
+LVGL provides everything you need to create an
+embedded GUI with easy-to-use graphical elements, beautiful visual
+effects and a low memory footprint.  
 </p>
 
 <h4 align="center">

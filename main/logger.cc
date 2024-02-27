@@ -1,11 +1,15 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "log.hh"
+#include "logger.hh"
 
 static const char *TAG = "SensorStation";
 
-void log_init()
+Logger::Logger()
+{
+}
+
+void Logger::init()
 {
     // TODO Announce the Free memory and version via MQTT
     ESP_LOGI(TAG, "[APP] Sensor Station is Starting");

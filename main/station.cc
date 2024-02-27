@@ -10,9 +10,7 @@ static const char *TAG = "STATION";
 static void station_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
 
 Station::Station() {
-    // Initialize DHT with proper pin
-    // Initialize relays with proper pin(s)
-    // register station handler
+
     dht = new DHT((gpio_num_t) 23);
     _id = net->mac2str();
 
@@ -23,9 +21,14 @@ Station::Station() {
 
     oled = new OLED(22, 21);
     oled->update_info(_id);
+
+#ifdef NOTNOW
+    soil = new Soil((gpio_num_t) 32);
+    soil->read();
+#endif // NOTNOW
 }
 
-void dht_read_data(void *arg)
+static void periodic_reader(void *arg)
 {
     Station *st = (Station *) arg;
     if (st == NULL || st->dht == NULL) {
@@ -33,6 +36,7 @@ void dht_read_data(void *arg)
         return;
     }
     st->dht->read_data();
+    // st->soil->read();
 
     ESP_LOGI(TAG, "ESP Read DHT temperature and humidity");
     ESP_ERROR_CHECK(esp_event_post(DATA_EVENTS,
@@ -45,12 +49,13 @@ void dht_read_data(void *arg)
 void Station::start_reading()
 {
     esp_timer_create_args_t periodic_timer_args = {};
-    periodic_timer_args.callback = &dht_read_data;
+    periodic_timer_args.callback = &periodic_reader;
     periodic_timer_args.name = "periodic";
     periodic_timer_args.arg = this;
 
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+    printf("periodic_timer running\n");
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 5000000)); 
     ESP_ERROR_CHECK(esp_event_handler_register(DATA_EVENTS, EVENT_DATA_STATION, station_handler, this));
 }

@@ -4,8 +4,9 @@
 #include <string>
 
 #include "dht.hh"
-#include "relay.hh"
 #include "oled.hh"
+#include "relay.hh"
+#include "soil.hh"
 
 class Station
 {
@@ -18,8 +19,10 @@ public:
     Station();
 
     DHT         *dht;
-    Relays      *relays;
     OLED        *oled;
+    // Soil        *soil;
+    Relays      *relays;
+
 
     void update_display();
 
