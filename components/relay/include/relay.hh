@@ -46,4 +46,3 @@ public:
     std::string json();
 };
 
-extern Relays relays;

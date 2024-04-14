@@ -158,7 +158,6 @@ void MQTT::publish(std::string topic, int val) {
 void MQTT::publish(std::string topic, std::string val) {
     std::string root = "ss/d/";
     std::string path = root + net->mac2str() + "/" + topic;
-
     esp_mqtt_client_publish(_client, path.c_str(), val.c_str(), 0, 1, 0);
 }
 

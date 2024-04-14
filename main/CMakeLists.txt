@@ -1,7 +1,6 @@
 idf_component_register(SRCS
         main.cc
-        pinmap.cc
-        log.cc
+        logger.cc
         mqtt.cc
         msg.cc
         event.cc

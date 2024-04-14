@@ -25,5 +25,13 @@ enum EVENT_CONTROL_TYPE {
     EVENT_CONTROL_SWITCH,
 };
 
-extern void events_init();
-extern char* get_id_string(esp_event_base_t base, int32_t id);
+class Events
+{
+public:
+    Events();
+    void start();
+};
+
+char *get_id_string(esp_event_base_t base, int32_t id);
+
+extern Events *events;
